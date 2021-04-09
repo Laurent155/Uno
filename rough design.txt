@@ -1,0 +1,15 @@
+Uno game features required:
+1. set up server/ network
+2. Game class which contains all the game logic
+3. card.py, stores info and effects about/of each card/ move
+4. Player class which stores player info
+5. draw window .py
+6. images
+
+More details:
+1. data of all the player and game info should be stored and changed in the server, and sent back to each player each update.
+   define increment = 1 (initial value), turn = 0, multiplyer = 1 and when update_turn, turn = (turn + increment) % #ofplayers, and when e.g. a reverse card is played,
+   increment *= -1
+2. Contains basic game logic such as shuffling, card dealing, next player's turn, win condition check.
+3. deals with card effects, will be called by either the Game class, or from server
+4. 
