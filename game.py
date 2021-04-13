@@ -1,6 +1,20 @@
 import pygame
 from player import *
 import random
+from os import listdir
+from os.path import isfile, join
+
+# loading the images into a dictionary
+
+files = [f[:-4] for f in listdir(r"C:\Users\Jerome159\Desktop\Tech\Python Projects\Uno\image") if
+         isfile(join(r"C:\Users\Jerome159\Desktop\Tech\Python Projects\Uno\image", f))]
+
+image_dictionary = {}
+for x in files:
+    image_dictionary[x] = pygame.image.load(
+        r"C:\Users\Jerome159\Desktop\Tech\Python Projects\Uno\image\{0}.png".format(x))
+
+image_dictionary["background"] = pygame.transform.scale(image_dictionary["background"], (1200, 800))
 
 
 class Game:
@@ -13,38 +27,41 @@ class Game:
         self.current_colour = 'none'
         self.increment = 1
         self.discard_pile = []
+        self.players_in_game = [i for i in range(len(self.player_list))]
+        self.winners = []
 
     def check_victory(self, player_number):
         if len(self.player_list[player_number].card_list) <= 1:
+            self.winners.append(player_number)
+            self.players_in_game.remove(player_number)
             return True
         else:
             return False
 
     def update_deck(self, d):
-        if len(d < 70):
+        if len(d < 100):
             random.shuffle(self.discard_pile)
             d = d + self.discard_pile
 
     def move_effect(self, player_number, card_attempted, d):
         if self.player_list[player_number].card_list[card_attempted].content == "reverse":
             self.increment *= -1
-        elif self.player_list[player_number].card_list[card_attempted].content == "draw two":
+        elif self.player_list[player_number].card_list[card_attempted].content == "draw_two":
             self.draw_one_card(player_number + self.increment, d)
             self.draw_one_card(player_number + self.increment, d)
         elif self.player_list[player_number].card_list[card_attempted].content == "skip":
             self.update_turn()
-        elif self.player_list[player_number].card_list[card_attempted].content == "wild card":
-            self.set_colour(player_number)
-        elif self.player_list[player_number].card_list[card_attempted].content == "wild draw four":
-            self.set_colour(player_number)
+        elif self.player_list[player_number].card_list[card_attempted].content == "wild_card":
+            self.find_previous_player()
+        elif self.player_list[player_number].card_list[card_attempted].content == "wild_draw_four":
             self.draw_one_card(player_number + self.increment, d)
             self.draw_one_card(player_number + self.increment, d)
             self.draw_one_card(player_number + self.increment, d)
             self.draw_one_card(player_number + self.increment, d)
+            self.find_previous_player()
 
     def update_turn(self):
-        self.turn_number += self.increment
-        self.turn_number %= len(self.player_list)
+        self.find_next_player()
         if self.card_displayed.colour != '':
             self.current_colour = self.card_displayed.colour
 
@@ -52,6 +69,8 @@ class Game:
         if card_attempted == "draw card":
             return False
         if card_attempted == "next player":
+            return False
+        if card_attempted in ["red", "green", "blue", "yellow"]:
             return False
         elif self.turn_number == player_number and card_attempted != "none":
             if self.current_colour == "none":
@@ -121,8 +140,19 @@ class Game:
         reply = [player_deck, others_card_number, self.card_displayed]
         return reply
 
-    def set_colour(self, player_number):
-        pass
+    def find_next_player(self):
+        if self.players_in_game:
+            ind = self.players_in_game.index(self.turn_number)
+            ind += 1
+            ind %= len(self.players_in_game)
+            self.turn_number = self.players_in_game[ind]
+
+    def find_previous_player(self):
+        if self.players_in_game:
+            ind = self.players_in_game.index(self.turn_number)
+            ind -= 1
+            ind %= len(self.players_in_game)
+            self.turn_number = self.players_in_game[ind]
 
 
 class Card:
@@ -167,14 +197,14 @@ def generate_deck():
         else:
             add_card_to_deck("blue", i)
             add_card_to_deck("blue", i)
-    add_card_to_deck("red", "draw two")
-    add_card_to_deck("red", "draw two")
-    add_card_to_deck("green", "draw two")
-    add_card_to_deck("green", "draw two")
-    add_card_to_deck("yellow", "draw two")
-    add_card_to_deck("yellow", "draw two")
-    add_card_to_deck("blue", "draw two")
-    add_card_to_deck("blue", "draw two")
+    add_card_to_deck("red", "draw_two")
+    add_card_to_deck("red", "draw_two")
+    add_card_to_deck("green", "draw_two")
+    add_card_to_deck("green", "draw_two")
+    add_card_to_deck("yellow", "draw_two")
+    add_card_to_deck("yellow", "draw_two")
+    add_card_to_deck("blue", "draw_two")
+    add_card_to_deck("blue", "draw_two")
 
     add_card_to_deck("red", "skip")
     add_card_to_deck("red", "skip")
@@ -194,10 +224,17 @@ def generate_deck():
     add_card_to_deck("blue", "reverse")
     add_card_to_deck("blue", "reverse")
 
-    add_card_to_deck("", "wild card")
-    add_card_to_deck("", "wild card")
-    add_card_to_deck("", "wild draw four")
-    add_card_to_deck("", "wild draw four")
+    add_card_to_deck("", "wild_card")
+    add_card_to_deck("", "wild_card")
+    add_card_to_deck("", "wild_draw_four")
+    add_card_to_deck("", "wild_draw_four")
+
+
+def find_image(card):
+    if isinstance(card.content, int) or card.colour == "":
+        return image_dictionary[card.colour + str(card.content)]
+    else:
+        return image_dictionary[card.colour + "_" + str(card.content)]
 
 
 def shuffle():

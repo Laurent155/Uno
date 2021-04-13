@@ -5,7 +5,7 @@ from game import *
 
 server = "192.168.0.35"
 
-port = 5555
+port = 8888
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -27,7 +27,7 @@ def threaded_client(conn, player):
 
     while True:
         try:
-            data = pickle.loads(conn.recv(2048 * 64))
+            data = pickle.loads(conn.recv(2048 * 2048))
             if not data:
                 print("Disconnected")
                 break
@@ -37,14 +37,19 @@ def threaded_client(conn, player):
                     # g.check_victory(data[0])
                     reply = g.generate_reply(data[0], data[1])
                     g.update_turn()
-                elif data[1] == "draw card":
+                elif data[0] == g.turn_number and data[1] == "draw card":
                     if g.valid_draw(data[0]):
                         reply = g.draw_one_card(data[0], deck)
                         reply.append(g.valid_move(data[0], -1))
                         conn.sendall(pickle.dumps(reply))
-                elif data[1] == "next player":
+                elif data[0] == g.turn_number and data[1] == "next player":
                     reply = [g.player_list[data[0]].card_list, [], g.card_displayed]
                     g.update_turn()
+                elif data[0] == g.turn_number and data[1] in ["red", "green", "blue", "yellow"]:
+                    g.update_turn()
+                    g.current_colour = data[1]
+                    print(g.current_colour)
+                    reply = g.generate_reply02(data[0])
                 else:
                     reply = g.generate_reply02(data[0])
             conn.sendall(pickle.dumps(reply))
