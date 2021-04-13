@@ -47,21 +47,22 @@ class Game:
         if self.player_list[player_number].card_list[card_attempted].content == "reverse":
             self.increment *= -1
         elif self.player_list[player_number].card_list[card_attempted].content == "draw_two":
-            self.draw_one_card(player_number + self.increment, d)
-            self.draw_one_card(player_number + self.increment, d)
+            self.draw_one_card(self.find_next_player(), d)
+            self.draw_one_card(self.find_next_player(), d)
+            self.update_turn()
         elif self.player_list[player_number].card_list[card_attempted].content == "skip":
             self.update_turn()
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_card":
             self.find_previous_player()
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_draw_four":
-            self.draw_one_card(player_number + self.increment, d)
-            self.draw_one_card(player_number + self.increment, d)
-            self.draw_one_card(player_number + self.increment, d)
-            self.draw_one_card(player_number + self.increment, d)
+            self.draw_one_card(self.find_next_player(), d)
+            self.draw_one_card(self.find_next_player(), d)
+            self.draw_one_card(self.find_next_player(), d)
+            self.draw_one_card(self.find_next_player(), d)
             self.find_previous_player()
 
     def update_turn(self):
-        self.find_next_player()
+        self.turn_number = self.find_next_player()
         if self.card_displayed.colour != '':
             self.current_colour = self.card_displayed.colour
 
@@ -81,11 +82,7 @@ class Game:
                 return True
             elif self.card_displayed.content == self.player_list[player_number].card_list[card_attempted].content:
                 return True
-        else:
-            return False
-
-    def valid_draw(self, player_number):
-        return True
+        return False
 
     def generate_reply(self, player_number, card_attempted):
         if card_attempted != "none":
@@ -143,16 +140,22 @@ class Game:
     def find_next_player(self):
         if self.players_in_game:
             ind = self.players_in_game.index(self.turn_number)
-            ind += 1
+            ind += self.increment
             ind %= len(self.players_in_game)
-            self.turn_number = self.players_in_game[ind]
+            return self.players_in_game[ind]
 
     def find_previous_player(self):
         if self.players_in_game:
             ind = self.players_in_game.index(self.turn_number)
-            ind -= 1
+            ind -= self.increment
             ind %= len(self.players_in_game)
-            self.turn_number = self.players_in_game[ind]
+            return self.players_in_game[ind]
+
+    def can_play(self, player_number):
+        for card in range(len(self.player_list[player_number].card_list)):
+            if self.valid_move(player_number, card):
+                return True
+        return False
 
 
 class Card:

@@ -5,7 +5,7 @@ from game import *
 
 server = "192.168.0.35"
 
-port = 8888
+port = 8889
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -17,17 +17,17 @@ except socket.error as e:
 s.listen(6)  # allow max 6 people to play
 print("Waiting for a connection. Server Started")
 # will first just suppose we have 3 players in total
-g = Game(deal_card(deck, 3))
+g = Game(deal_card(deck, 1))
 
 
 def threaded_client(conn, player):
     player_number = player
-    info = [player_number] + g.player_list[player_number].card_list
+    info = [player_number] + g.player_list[player_number].card_list + [True]
     conn.sendall(pickle.dumps(info))
 
     while True:
         try:
-            data = pickle.loads(conn.recv(2048 * 2048))
+            data = pickle.loads(conn.recv(2048 * 8))
             if not data:
                 print("Disconnected")
                 break
@@ -36,24 +36,33 @@ def threaded_client(conn, player):
                     g.move_effect(data[0], data[1], deck)
                     # g.check_victory(data[0])
                     reply = g.generate_reply(data[0], data[1])
+                    reply.append(True)
                     g.update_turn()
+                    conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] == "draw card":
-                    if g.valid_draw(data[0]):
-                        reply = g.draw_one_card(data[0], deck)
-                        reply.append(g.valid_move(data[0], -1))
-                        conn.sendall(pickle.dumps(reply))
+                    reply = g.draw_one_card(data[0], deck)
+                    reply.append(g.valid_move(data[0], -1))
+                    conn.sendall(pickle.dumps(reply))
+                elif not g.can_play(data[0]) and data[0] == g.turn_number:
+                    reply = g.generate_reply02(data[0])
+                    reply.append(False)
+                    conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] == "next player":
-                    reply = [g.player_list[data[0]].card_list, [], g.card_displayed]
+                    reply = [g.player_list[data[0]].card_list, [], g.card_displayed, True]
                     g.update_turn()
+                    conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] in ["red", "green", "blue", "yellow"]:
                     g.update_turn()
+                    g.update_turn()
                     g.current_colour = data[1]
-                    print(g.current_colour)
                     reply = g.generate_reply02(data[0])
+                    reply.append(True)
+                    conn.sendall(pickle.dumps(reply))
                 else:
                     reply = g.generate_reply02(data[0])
-            conn.sendall(pickle.dumps(reply))
-            print(len(deck))
+                    reply.append(True)
+                    conn.sendall(pickle.dumps(reply))
+            # conn.sendall(pickle.dumps(reply))
         except:
             break
     print("Lost connection")
