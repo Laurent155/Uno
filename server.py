@@ -33,11 +33,12 @@ def threaded_client(conn, player):
                 break
             else:
                 if g.valid_move(data[0], data[1]):
+                    print(g.turn_number)
                     g.move_effect(data[0], data[1], deck)
-                    # g.check_victory(data[0])
                     reply = g.generate_reply(data[0], data[1])
-                    reply.append(True)
                     g.update_turn()
+                    g.check_victory(data[0])
+                    reply.append(True)
                     conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] == "draw card":
                     reply = g.draw_one_card(data[0], deck)
@@ -56,7 +57,6 @@ def threaded_client(conn, player):
                     g.update_turn()
                     reply = g.generate_reply02(data[0])
                     g.current_colour = data[1]
-                    print(g.current_colour)
                     reply.append(True)
                     conn.sendall(pickle.dumps(reply))
                 else:

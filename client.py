@@ -76,7 +76,9 @@ def main():
                 if 0 <= (pos[0] - 50) // 84 < len(player_deck) and 600 < pos[1] < 729 and not drew_card:
                     card_attempted = (pos[0] - 50) // 84
                     c = player_deck[card_attempted]
+                    print(1)
                     player_deck, others_card_number, card_played, can_play = n.send([player_number, card_attempted])
+                    print(2)
                     if c.__str__() == card_played.__str__() and c.colour == "":
                         choose_colour = True
                     card_attempted = "none"
@@ -99,6 +101,7 @@ def main():
                             choose_colour = True
                         card_drawn_playable = False
                         drew_card = False
+                        can_play = True
                     elif 1000 < pos[0] < 1100 and 625 < pos[1] < 660:
                         n.send([player_number, "next player"])
                         card_drawn_playable = False

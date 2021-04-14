@@ -34,9 +34,6 @@ class Game:
         if len(self.player_list[player_number].card_list) <= 1:
             self.winners.append(player_number)
             self.players_in_game.remove(player_number)
-            return True
-        else:
-            return False
 
     def update_deck(self, d):
         if len(d < 100):
@@ -53,7 +50,7 @@ class Game:
         elif self.player_list[player_number].card_list[card_attempted].content == "skip":
             self.update_turn()
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_card":
-            self.find_previous_player()
+            self.turn_number = self.find_previous_player()
             pass
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_draw_four":
             self.draw_one_card(self.find_next_player(), d)
@@ -130,7 +127,6 @@ class Game:
     def draw_one_card(self, player_number, d):
         self.player_list[player_number].card_list.append(d[0])
         player_deck = self.player_list[player_number].card_list
-        self.discard_pile.append(d[0])
         del d[0]
         others_card_number = []
         for i in self.player_list:
