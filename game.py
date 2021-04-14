@@ -31,7 +31,7 @@ class Game:
         self.winners = []
 
     def check_victory(self, player_number):
-        if len(self.player_list[player_number].card_list) <= 1:
+        if len(self.player_list[player_number].card_list) <= 0:
             self.winners.append(player_number)
             self.players_in_game.remove(player_number)
 
