@@ -54,6 +54,7 @@ class Game:
             self.update_turn()
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_card":
             self.find_previous_player()
+            pass
         elif self.player_list[player_number].card_list[card_attempted].content == "wild_draw_four":
             self.draw_one_card(self.find_next_player(), d)
             self.draw_one_card(self.find_next_player(), d)

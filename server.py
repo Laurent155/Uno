@@ -17,7 +17,7 @@ except socket.error as e:
 s.listen(6)  # allow max 6 people to play
 print("Waiting for a connection. Server Started")
 # will first just suppose we have 3 players in total
-g = Game(deal_card(deck, 2))
+g = Game(deal_card(deck, 4))
 
 
 def threaded_client(conn, player):
@@ -53,7 +53,6 @@ def threaded_client(conn, player):
                     g.update_turn()
                     conn.sendall(pickle.dumps(reply))
                 elif data[1] in ["red", "green", "blue", "yellow"]:
-                    g.update_turn()
                     g.update_turn()
                     reply = g.generate_reply02(data[0])
                     g.current_colour = data[1]
