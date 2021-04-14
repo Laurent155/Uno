@@ -73,7 +73,7 @@ def main():
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if 0 <= (pos[0] - 50) // 84 < len(player_deck) and 600 < pos[1] < 729:
+                if 0 <= (pos[0] - 50) // 84 < len(player_deck) and 600 < pos[1] < 729 and not drew_card:
                     card_attempted = (pos[0] - 50) // 84
                     c = player_deck[card_attempted]
                     player_deck, others_card_number, card_played, can_play = n.send([player_number, card_attempted])
@@ -84,29 +84,29 @@ def main():
                     # player_deck, others_card_number, card_played, card_drawn_playable
                     info = n.send([player_number, "draw card"])
                     card_drawn_playable = info[-1]
-                    print(info[-1])
                     drew_card = True
                 if choose_colour:
                     if 300 < pos[0] < 900 and 300 < pos[1] < 450:
                         colour_chosen = (pos[0] - 300) // 150
+                        print(colours[colour_chosen])
                         n.send([player_number, colours[colour_chosen]])
                         choose_colour = False
                 if card_drawn_playable and drew_card:
-                    print("got here1")
                     if 1000 < pos[0] < 1100 and 590 < pos[1] < 625:
-                         # player_deck, others_card_number, card_played, can_play =
-                        print("got here2")
-                        n.send([player_number, -1])
+                        c = player_deck[-1]
+                        player_deck, others_card_number, card_played, can_play = n.send([player_number, -1])
+                        if c.__str__() == card_played.__str__() and c.colour == "":
+                            choose_colour = True
                         card_drawn_playable = False
-                        can_play = True
+                        drew_card = False
                     elif 1000 < pos[0] < 1100 and 625 < pos[1] < 660:
                         n.send([player_number, "next player"])
                         card_drawn_playable = False
                         drew_card = False
-                        can_play = True
 
-                elif not card_drawn_playable and drew_card:
+                if not card_drawn_playable and drew_card:
                     n.send([player_number, "next player"])
+                    print("got here")
                     drew_card = False
         information = n.send([player_number, card_attempted])
         player_deck = information[0]
