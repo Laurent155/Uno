@@ -38,30 +38,30 @@ def threaded_client(conn, player):
                     reply = g.generate_reply(data[0], data[1])
                     g.update_turn()
                     g.check_victory(data[0])
-                    reply.append(True)
+                    reply = reply + [True, g.current_colour, g.turn_number]
                     conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] == "draw card":
                     reply = g.draw_one_card(data[0], deck)
-                    reply.append(g.valid_move(data[0], -1))
+                    reply += [g.valid_move(data[0], -1), g.current_colour, g.turn_number]
                     conn.sendall(pickle.dumps(reply))
                 elif not g.can_play(data[0]) and data[0] == g.turn_number and data[1] != "next player" and data[1] \
                         not in ["red", "green", "blue", "yellow"]:
                     reply = g.generate_reply02(data[0])
-                    reply.append(False)
+                    reply += [False, g.current_colour, g.turn_number]
                     conn.sendall(pickle.dumps(reply))
                 elif data[0] == g.turn_number and data[1] == "next player":
-                    reply = [g.player_list[data[0]].card_list, [], g.card_displayed, True]
+                    reply = [g.player_list[data[0]].card_list, [], g.card_displayed, True, g.current_colour, g.turn_number]
                     g.update_turn()
                     conn.sendall(pickle.dumps(reply))
                 elif data[1] in ["red", "green", "blue", "yellow"]:
                     g.update_turn()
                     reply = g.generate_reply02(data[0])
                     g.current_colour = data[1]
-                    reply.append(True)
+                    reply += [True, g.current_colour, g.turn_number]
                     conn.sendall(pickle.dumps(reply))
                 else:
                     reply = g.generate_reply02(data[0])
-                    reply.append(True)
+                    reply += [True, g.current_colour, g.turn_number]
                     conn.sendall(pickle.dumps(reply))
             # conn.sendall(pickle.dumps(reply))
         except:
